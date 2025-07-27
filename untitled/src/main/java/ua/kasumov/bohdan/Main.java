@@ -80,8 +80,8 @@ class IntroForm extends JFrame {
 }
 
 class SortForm extends JFrame {
-    private java.util.List<JButton> numberButtons = new ArrayList<>();
-    private java.util.List<Integer> numbers = new ArrayList<>();
+    private List<JButton> numberButtons = new ArrayList<>();
+    private List<Integer> numbers = new ArrayList<>();
     private JPanel numberPanel;
     private boolean descending = true;
 
@@ -112,6 +112,11 @@ class SortForm extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Create and configure control panel with sort/reset buttons.
+     *
+     * @return JPanel object with control panel
+     */
     private JPanel createControlPanel() {
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
@@ -137,6 +142,11 @@ class SortForm extends JFrame {
         return controlPanel;
     }
 
+    /**
+     * Set visual properties to util buttons (sort, reset).
+     *
+     * @param utilButton the button to apply properties to
+     */
     private static void setUtilButtonProperties(JButton utilButton) {
         Dimension buttonSize = new Dimension(80, 25);
         utilButton.setBackground(Color.GREEN.darker());
@@ -150,6 +160,11 @@ class SortForm extends JFrame {
         utilButton.setMinimumSize(buttonSize);
     }
 
+    /**
+     * Set visual properties to number buttons.
+     *
+     * @param numberButton the button to apply properties to
+     */
     private static void setNumberButtonProperties(JButton numberButton) {
         Dimension buttonSize = new Dimension(80, 25);
         numberButton.setBackground(Color.BLUE);
@@ -163,6 +178,11 @@ class SortForm extends JFrame {
         numberButton.setMinimumSize(buttonSize);
     }
 
+    /**
+     * Generate a list of random integer value. Must contain at least one values equals or less than 30.
+     *
+     * @param count - the number of random values to generate.
+     */
     private void generateNumbers(int count) {
         List<Integer> generated = IntStream.range(0, count)
                 .map(i -> (int) (Math.random() * 1000) + 1)
@@ -178,6 +198,10 @@ class SortForm extends JFrame {
         numbers.addAll(generated);
     }
 
+    /**
+     * Renders the number buttons based on numbers list.
+     * Clears previous buttons and re-adds them to the panel.
+     */
     private void renderButtons() {
         numberPanel.removeAll();
         numberButtons.clear();
@@ -199,6 +223,15 @@ class SortForm extends JFrame {
         numberPanel.repaint();
     }
 
+    /**
+     * Create a JButton object for specific number
+     * Adds an ActionListener that handles:
+     * - generating new random numbers if value <=30
+     * - showing a warning if value > 30
+     *
+     * @param i the index of the number in the list
+     * @return configured JButton object
+     */
     private JButton createNumberButton(int i) {
         int num = numbers.get(i);
         JButton btn = new JButton(String.valueOf(num));
@@ -218,6 +251,12 @@ class SortForm extends JFrame {
         return btn;
     }
 
+    /**
+     * Performs quickSort recursively on numbers list.
+     *
+     * @param low the starting index
+     * @param high the ending index
+     */
     private void quickSort(int low, int high) {
         if (low < high) {
             int pi = partition(low, high);
@@ -227,6 +266,14 @@ class SortForm extends JFrame {
         }
     }
 
+    /**
+     * Partition list of numbers around a pivot value.
+     * Elements smaller (or larger if descending) tha the pivot are moved to the left, others to the right.
+     *
+     * @param low starting index of partition
+     * @param high ending index of partition
+     * @return partition index
+     */
     private int partition(int low, int high) {
         int pivot = numbers.get(high);
         int partitionIndex = low - 1;
@@ -248,12 +295,22 @@ class SortForm extends JFrame {
         return partitionIndex + 1;
     }
 
+    /**
+     * Swaps two element in number list.
+     *
+     * @param i first element index
+     * @param j second element index
+     */
     private void swap(int i, int j) {
         int temp = numbers.get(i);
         numbers.set(i, numbers.get(j));
         numbers.set(j, temp);
     }
 
+    /**
+     * Updates the number buttons on the UI after sorting.
+     * Uses a small delay to allow animation effect.
+     */
     private void updateUIWithDelay() {
         try {
             SwingUtilities.invokeAndWait(() -> renderButtons());
@@ -263,6 +320,9 @@ class SortForm extends JFrame {
         }
     }
 
+    /**
+     * Change sort directional
+     */
     private void changeSortOrder() {
         descending = !descending;
     }
