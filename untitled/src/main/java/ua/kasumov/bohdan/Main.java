@@ -1,8 +1,5 @@
 package ua.kasumov.bohdan;
 
-import com.intellij.uiDesigner.core.GridConstraints;
-import com.intellij.uiDesigner.core.GridLayoutManager;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -36,7 +33,7 @@ public class Main {
 }
 
 class IntroForm extends JFrame {
-    private static final int INCORRECT_NUMBER =0;
+    private static final int INCORRECT_NUMBER = 0;
     private static final String INTRO_FORM_TEXT = "Intro";
     private static final String LABEL_TEXT = "How many numbers to display?";
     private static final String ENTER_BUTTON_TEXT = "Enter";
@@ -67,37 +64,37 @@ class IntroForm extends JFrame {
     }
 
     private void createForm() {
-        contentPane = new JPanel();
-        contentPane.setLayout(new GridLayoutManager(3, 1, new Insets(30, 30, 30, 30), -1, -1));
+        contentPane = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
         Dimension buttonSize = new Dimension(80, 25);
 
-        JLabel introLabel = new JLabel();
-        introLabel.setText(LABEL_TEXT);
+        JLabel introLabel = new JLabel(LABEL_TEXT);
         JPanel labelPanel = new JPanel(new BorderLayout());
-        labelPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
         labelPanel.add(introLabel);
-        contentPane.add(labelPanel, new GridConstraints(0, 0, 1, 1,
-                GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-                GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0,
-                false));
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.insets = new Insets(10, 10, 5, 10);
+        contentPane.add(labelPanel, gbc);
 
         numberTextField = new JTextField();
+        numberTextField.setPreferredSize(buttonSize);
         JPanel textFieldPanel = new JPanel(new BorderLayout());
-        textFieldPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
         textFieldPanel.add(numberTextField);
-        contentPane.add(textFieldPanel, new GridConstraints(1, 0, 1, 1,
-                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-                GridConstraints.SIZEPOLICY_FIXED, null, buttonSize, null, 0,
-                false));
 
-        introButton = new JButton();
-        introButton.setText(ENTER_BUTTON_TEXT);
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+        contentPane.add(textFieldPanel, gbc);
+
+        introButton = new JButton(ENTER_BUTTON_TEXT);
+        introButton.setPreferredSize(buttonSize);
         introButton.setBackground(Color.BLUE);
         introButton.setForeground(Color.WHITE);
-        contentPane.add(introButton, new GridConstraints(2, 0, 1, 1,
-                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED,
-                GridConstraints.SIZEPOLICY_FIXED, null, buttonSize, null, 0,
-                false));
+
+        gbc.gridy = 2;
+        contentPane.add(introButton, gbc);
     }
 
 }
@@ -368,8 +365,8 @@ class SortForm extends JFrame {
     private void highlightButtons(int i, int j) {
         renderButtons();
 
-        for (JButton button : numberButtons){
-            int value= Integer.parseInt(button.getText());
+        for (JButton button : numberButtons) {
+            int value = Integer.parseInt(button.getText());
             if (value == numbers.get(i) || value == numbers.get(j)) {
                 button.setBackground(UPDATE_BUTTON_BACKGROUND);
             } else {
