@@ -3,10 +3,29 @@ package ua.kasumov.bohdan;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -17,27 +36,31 @@ public class Main {
 }
 
 class IntroForm extends JFrame {
+    private static final int INCORRECT_NUMBER =0;
+    private static final String INTRO_FORM_TEXT = "Intro";
+    private static final String LABEL_TEXT = "How many numbers to display?";
+    private static final String ENTER_BUTTON_TEXT = "Enter";
+    private static final String NUMBER_EXCEPTION_MESSAGE = "Enter positive number";
+
     private JPanel contentPane;
     private JTextField numberTextField;
     private JButton introButton;
-    private JLabel introLabel;
 
     public IntroForm() {
         createForm();
         introButton.addActionListener(e -> {
             try {
                 int count = Integer.parseInt(numberTextField.getText());
-                if (count == 0) throw new NumberFormatException();
+                if (count <= INCORRECT_NUMBER) throw new NumberFormatException();
                 new SortForm(count);
                 dispose();
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(IntroForm.this, "Enter positive number");
+            } catch (NumberFormatException exception) {
+                JOptionPane.showMessageDialog(IntroForm.this, NUMBER_EXCEPTION_MESSAGE);
             }
-
         });
-        setTitle("Intro");
+        setTitle(INTRO_FORM_TEXT);
         setContentPane(contentPane);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         pack();
         setVisible(true);
@@ -48,8 +71,8 @@ class IntroForm extends JFrame {
         contentPane.setLayout(new GridLayoutManager(3, 1, new Insets(30, 30, 30, 30), -1, -1));
         Dimension buttonSize = new Dimension(80, 25);
 
-        introLabel = new JLabel();
-        introLabel.setText("How many numbers to display?");
+        JLabel introLabel = new JLabel();
+        introLabel.setText(LABEL_TEXT);
         JPanel labelPanel = new JPanel(new BorderLayout());
         labelPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
         labelPanel.add(introLabel);
@@ -68,7 +91,7 @@ class IntroForm extends JFrame {
                 false));
 
         introButton = new JButton();
-        introButton.setText("Enter");
+        introButton.setText(ENTER_BUTTON_TEXT);
         introButton.setBackground(Color.BLUE);
         introButton.setForeground(Color.WHITE);
         contentPane.add(introButton, new GridConstraints(2, 0, 1, 1,
@@ -80,15 +103,29 @@ class IntroForm extends JFrame {
 }
 
 class SortForm extends JFrame {
-    private List<JButton> numberButtons = new ArrayList<>();
-    private List<Integer> numbers = new ArrayList<>();
-    private JPanel numberPanel;
+    private static final int MAX_ALLOWED_VALUE = 30;
+    private static final int MAX_ROWS_NUMBER_PANEL = 10;
+    private static final int MAX_RANDOM_NUMBER_VALUE = 1000;
+    private static final int DELAY_UPDATE_UI = 200;
+    private static final int SORT_FORM_WIDTH = 600;
+    private static final int SORT_FROM_HEIGHT = 400;
+    private static final Color UPDATE_BUTTON_BACKGROUND = Color.RED;
+    private static final Color NUMBER_BUTTON_BACKGROUND = Color.BLUE;
+    private static final Color UTIL_BUTTON_BACKGROUND = Color.GREEN.darker();
+    private static final Color TEXT_COLOR = Color.WHITE;
+    private static final String SORT_UTIL_BUTTON_TEXT = "Sort";
+    private static final String RESET_UTIL_BUTTON_TEXT = "Reset";
+    private static final String SORT_FORM_TEXT = "Sort";
+
+    private final List<JButton> numberButtons = new ArrayList<>();
+    private final List<Integer> numbers = new ArrayList<>();
+    private final JPanel numberPanel;
     private boolean descending = true;
 
     public SortForm(int count) {
-        setTitle("Sort");
-        setSize(600, 400);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle(SORT_FORM_TEXT);
+        setSize(SORT_FORM_WIDTH, SORT_FROM_HEIGHT);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
@@ -122,14 +159,15 @@ class SortForm extends JFrame {
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
         controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JButton sortButton = new JButton("Sort");
+        JButton sortButton = new JButton(SORT_UTIL_BUTTON_TEXT);
         setUtilButtonProperties(sortButton);
         sortButton.addActionListener(e -> new Thread(() -> {
             quickSort(0, numbers.size() - 1);
             changeSortOrder();
+            renderButtons();
         }).start());
 
-        JButton resetButton = new JButton("Reset");
+        JButton resetButton = new JButton(RESET_UTIL_BUTTON_TEXT);
         setUtilButtonProperties(resetButton);
         resetButton.addActionListener(e -> {
             dispose();
@@ -148,16 +186,8 @@ class SortForm extends JFrame {
      * @param utilButton the button to apply properties to
      */
     private static void setUtilButtonProperties(JButton utilButton) {
-        Dimension buttonSize = new Dimension(80, 25);
-        utilButton.setBackground(Color.GREEN.darker());
-        utilButton.setOpaque(true);
-        utilButton.setForeground(Color.WHITE);
-        utilButton.setFocusPainted(false);
-        utilButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        utilButton.setSize(buttonSize);
-        utilButton.setMaximumSize(buttonSize);
-        utilButton.setPreferredSize(buttonSize);
-        utilButton.setMinimumSize(buttonSize);
+        utilButton.setBackground(UTIL_BUTTON_BACKGROUND);
+        setButtonProperties(utilButton);
     }
 
     /**
@@ -166,16 +196,25 @@ class SortForm extends JFrame {
      * @param numberButton the button to apply properties to
      */
     private static void setNumberButtonProperties(JButton numberButton) {
+        numberButton.setBackground(NUMBER_BUTTON_BACKGROUND);
+        setButtonProperties(numberButton);
+    }
+
+    /**
+     * Set visual properties to buttons.
+     *
+     * @param button the button to apply properties to
+     */
+    private static void setButtonProperties(JButton button) {
         Dimension buttonSize = new Dimension(80, 25);
-        numberButton.setBackground(Color.BLUE);
-        numberButton.setOpaque(true);
-        numberButton.setForeground(Color.WHITE);
-        numberButton.setFocusPainted(false);
-        numberButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        numberButton.setSize(buttonSize);
-        numberButton.setMaximumSize(buttonSize);
-        numberButton.setPreferredSize(buttonSize);
-        numberButton.setMinimumSize(buttonSize);
+        button.setOpaque(true);
+        button.setForeground(TEXT_COLOR);
+        button.setFocusPainted(false);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setSize(buttonSize);
+        button.setMaximumSize(buttonSize);
+        button.setPreferredSize(buttonSize);
+        button.setMinimumSize(buttonSize);
     }
 
     /**
@@ -184,14 +223,15 @@ class SortForm extends JFrame {
      * @param count - the number of random values to generate.
      */
     private void generateNumbers(int count) {
+        Random random = new Random();
         List<Integer> generated = IntStream.range(0, count)
-                .map(i -> (int) (Math.random() * 1000) + 1)
+                .map(i -> random.nextInt(MAX_RANDOM_NUMBER_VALUE) + 1)
                 .boxed()
                 .collect(Collectors.toList());
 
-        if (generated.stream().noneMatch(n -> n <= 30)) {
-            int index = (int) (Math.random() * count);
-            generated.set(index, (int) (Math.random() * 30) + 1);
+        if (generated.stream().noneMatch(n -> n <= MAX_ALLOWED_VALUE)) {
+            int index = random.nextInt(count);
+            generated.set(index, random.nextInt(MAX_ALLOWED_VALUE) + 1);
         }
 
         numbers.clear();
@@ -211,12 +251,12 @@ class SortForm extends JFrame {
         gbc.insets = new Insets(5, 5, 5, 5);
 
         for (int i = 0; i < numbers.size(); i++) {
-            JButton btn = createNumberButton(i);
-            numberButtons.add(btn);
+            JButton button = createNumberButton(i);
+            numberButtons.add(button);
 
-            gbc.gridx = i / 10;
-            gbc.gridy = i % 10;
-            numberPanel.add(btn, gbc);
+            gbc.gridx = i / MAX_ROWS_NUMBER_PANEL;
+            gbc.gridy = i % MAX_ROWS_NUMBER_PANEL;
+            numberPanel.add(button, gbc);
         }
 
         numberPanel.revalidate();
@@ -233,36 +273,32 @@ class SortForm extends JFrame {
      * @return configured JButton object
      */
     private JButton createNumberButton(int i) {
-        int num = numbers.get(i);
-        JButton btn = new JButton(String.valueOf(num));
-        setNumberButtonProperties(btn);
-        btn.addActionListener(e -> {
-            if (num <= 30) {
-                int extraCount = (int) (Math.random() * 10) + 1;
-                for (int j = 0; j < extraCount; j++) {
-                    int newNum = (int) (Math.random() * 1000) + 1;
-                    numbers.add(newNum);
-                }
+        int number = numbers.get(i);
+        JButton button = new JButton(String.valueOf(number));
+        setNumberButtonProperties(button);
+        button.addActionListener(event -> {
+            if (number <= MAX_ALLOWED_VALUE) {
+                generateNumbers(number);
                 renderButtons();
             } else {
                 JOptionPane.showMessageDialog(this, "Please select a value smaller or equal to 30.");
             }
         });
-        return btn;
+        return button;
     }
 
     /**
      * Performs quickSort recursively on numbers list.
      *
-     * @param low the starting index
+     * @param low  the starting index
      * @param high the ending index
      */
     private void quickSort(int low, int high) {
         if (low < high) {
-            int pi = partition(low, high);
+            int pivotIndex = partition(low, high);
 
-            quickSort(low, pi - 1);
-            quickSort(pi + 1, high);
+            quickSort(low, pivotIndex - 1);
+            quickSort(pivotIndex + 1, high);
         }
     }
 
@@ -270,7 +306,7 @@ class SortForm extends JFrame {
      * Partition list of numbers around a pivot value.
      * Elements smaller (or larger if descending) tha the pivot are moved to the left, others to the right.
      *
-     * @param low starting index of partition
+     * @param low  starting index of partition
      * @param high ending index of partition
      * @return partition index
      */
@@ -305,6 +341,9 @@ class SortForm extends JFrame {
         int temp = numbers.get(i);
         numbers.set(i, numbers.get(j));
         numbers.set(j, temp);
+
+        highlightButtons(i, j);
+        updateUIWithDelay();
     }
 
     /**
@@ -313,11 +352,33 @@ class SortForm extends JFrame {
      */
     private void updateUIWithDelay() {
         try {
-            SwingUtilities.invokeAndWait(() -> renderButtons());
-            Thread.sleep(100);
-        } catch (Exception e) {
-            e.printStackTrace();
+            SwingUtilities.invokeAndWait(numberPanel::repaint);
+            Thread.sleep(DELAY_UPDATE_UI);
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
+    }
+
+    /**
+     * Highlight buttons to swap
+     *
+     * @param i first element index
+     * @param j second element index
+     */
+    private void highlightButtons(int i, int j) {
+        renderButtons();
+
+        for (JButton button : numberButtons){
+            int value= Integer.parseInt(button.getText());
+            if (value == numbers.get(i) || value == numbers.get(j)) {
+                button.setBackground(UPDATE_BUTTON_BACKGROUND);
+            } else {
+                button.setBackground(NUMBER_BUTTON_BACKGROUND);
+            }
+        }
+
+        numberPanel.revalidate();
+        numberPanel.repaint();
     }
 
     /**
